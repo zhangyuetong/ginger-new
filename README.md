@@ -1,5 +1,31 @@
 # Ginger 词典破译工作台
 
+## 手写README
+
+这是语言破译游戏Ginger的一个破译工作台。
+
+整个程序均为AI所做，我无法保证其任何准确性。各位也可以继续扩展这个AI屎山，反正基本是一次性的。
+
+运行方法：
+
+后端：
+
+```bash
+cd backend
+python -m pip install -r requirements.txt
+python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+前端：
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+以下为AI写的README，我没有看过，很可能过时。但如果AI要修改程序，建议也让他把README改了。
+
 前后端分离：FastAPI + SQLite + React(Vite)。
 
 ## 目录
