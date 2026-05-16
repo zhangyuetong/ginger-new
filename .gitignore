@@ -1,0 +1,13 @@
+Ginger.xlsx
+backend/app/__pycache__/__init__.cpython-313.pyc
+backend/app/__pycache__/bootstrap_import.cpython-313.pyc
+backend/app/__pycache__/database.cpython-313.pyc
+backend/app/__pycache__/ingest.cpython-313.pyc
+backend/app/__pycache__/main.cpython-313.pyc
+backend/app/__pycache__/models.cpython-313.pyc
+backend/app/__pycache__/parser.cpython-313.pyc
+backend/app/__pycache__/render.cpython-313.pyc
+backend/app/__pycache__/routes_entries.cpython-313.pyc
+backend/app/__pycache__/routes_import.cpython-313.pyc
+backend/app/__pycache__/schemas.cpython-313.pyc
+backend/tests/__pycache__/test_parser.cpython-313-pytest-8.3.4.pyc

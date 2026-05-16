@@ -1,0 +1,41 @@
+:root {
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    Segoe UI,
+    Roboto,
+    sans-serif;
+  line-height: 1.55;
+  color: #dbe4ea;
+  background-color: #0f1117;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #0f172a;
+    background-color: #f6f8fa;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+code,
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+#root {
+  height: 100%;
+  overflow: hidden;
+}
