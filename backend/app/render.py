@@ -50,6 +50,23 @@ def _is_word_boundary_right(text: str, idx_after: int) -> bool:
     return not _lexeme_char(text[idx_after])
 
 
+def text_contains_lemma(text: str, lemma: str) -> bool:
+    """True if lemma appears in text as a whole token (same boundaries as gloss matching)."""
+    if not text or not lemma:
+        return False
+    ln = len(lemma)
+    if ln > len(text):
+        return False
+    limit = len(text) - ln
+    pos = 0
+    while pos <= limit:
+        if text[pos : pos + ln] == lemma:
+            if _is_word_boundary_left(text, pos) and _is_word_boundary_right(text, pos + ln):
+                return True
+        pos += 1
+    return False
+
+
 def segment_to_spans(text: str, words_by_len: dict[int, dict[str, str]]) -> list[RenderSpan]:
     if not text:
         return []

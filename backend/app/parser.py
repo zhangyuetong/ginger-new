@@ -115,3 +115,27 @@ def loads_definition_json(s: str | None) -> dict[str, Any] | None:
         return data if isinstance(data, dict) else None
     except json.JSONDecodeError:
         return None
+
+
+_POS_LEXEME_SET: Final[frozenset[str]] = frozenset(PART_OF_SPEECH_LEXEMES)
+
+
+def normalize_pos_query(raw: str) -> str:
+    s = raw.strip()
+    if not s:
+        return s
+    if not s.endswith("."):
+        s = s + "."
+    return s
+
+
+def is_valid_pos_lexeme(pos: str) -> bool:
+    return pos in _POS_LEXEME_SET
+
+
+def entry_pos_labels(parsed: dict[str, Any]) -> set[str]:
+    return {b["pos"] for b in parsed.get("posBlocks") or [] if b.get("pos")}
+
+
+def entry_has_pos(parsed: dict[str, Any], pos_lexeme: str) -> bool:
+    return pos_lexeme in entry_pos_labels(parsed)

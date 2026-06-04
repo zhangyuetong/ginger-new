@@ -52,6 +52,33 @@ type EntriesPage = {
   nextCursor: number | null
 }
 
+type SearchMode = 'lemma' | 'definition' | 'pos'
+type WordMatch = 'prefix' | 'infix' | 'suffix'
+
+function buildEntriesUrl(
+  query: string,
+  searchMode: SearchMode,
+  wordMatch: WordMatch,
+  cursor?: number | null,
+): string {
+  const params = new URLSearchParams({ limit: '120', query, searchMode })
+  if (searchMode === 'lemma') {
+    params.set('wordMatch', wordMatch)
+  }
+  if (cursor != null) {
+    params.set('cursor', String(cursor))
+  }
+  return `/api/entries?${params.toString()}`
+}
+
+function searchPlaceholder(searchMode: SearchMode, wordMatch: WordMatch): string {
+  if (searchMode === 'definition') return '释义中出现的整词…'
+  if (searchMode === 'pos') return '词性，如 k. 或 sj.'
+  if (wordMatch === 'infix') return '词条包含…'
+  if (wordMatch === 'suffix') return '词条后缀…'
+  return '词条前缀…'
+}
+
 async function patchGuess(id: number, guessZh: string): Promise<EntryDetail> {
   return fetchJson<EntryDetail>(`/api/entries/${id}/guess`, {
     method: 'PATCH',
@@ -98,6 +125,8 @@ function SenseText({
 
 export default function App() {
   const [query, setQuery] = useState('')
+  const [searchMode, setSearchMode] = useState<SearchMode>('lemma')
+  const [wordMatch, setWordMatch] = useState<WordMatch>('prefix')
   const [items, setItems] = useState<EntryListRow[]>([])
   const [nextCursor, setNextCursor] = useState<number | null>(null)
   const [listLoading, setListLoading] = useState(false)
@@ -114,6 +143,7 @@ export default function App() {
   const [err, setErr] = useState<string | null>(null)
 
   const queryKey = query.trim()
+  const listFetchKey = `${queryKey}|${searchMode}|${wordMatch}`
 
   useEffect(() => {
     let alive = true
@@ -124,7 +154,7 @@ export default function App() {
       setErr(null)
       try {
         const page = await fetchJson<EntriesPage>(
-          `/api/entries?limit=120&query=${encodeURIComponent(queryKey)}`,
+          buildEntriesUrl(queryKey, searchMode, wordMatch),
           { signal: ac.signal },
         )
         if (!alive) return
@@ -145,7 +175,7 @@ export default function App() {
       alive = false
       ac.abort()
     }
-  }, [queryKey])
+  }, [listFetchKey])
 
   useEffect(() => {
     if (selectedId === null) return
@@ -183,7 +213,7 @@ export default function App() {
     setErr(null)
     try {
       const page = await fetchJson<EntriesPage>(
-        `/api/entries?limit=120&cursor=${nextCursor}&query=${encodeURIComponent(queryKey)}`,
+        buildEntriesUrl(queryKey, searchMode, wordMatch, nextCursor),
       )
       setItems((xs) => xs.concat(page.items))
       setNextCursor(page.nextCursor)
@@ -232,16 +262,64 @@ export default function App() {
           <div className="toolbarTitle">Ginger lexicon</div>
         </div>
         <div className="listScroller">
-          <div className="toolbar">
+          <div className="toolbar searchToolbar">
+            <div className="segmented" role="group" aria-label="搜索方式">
+              <button
+                type="button"
+                className={searchMode === 'lemma' ? 'seg active' : 'seg'}
+                onClick={() => setSearchMode('lemma')}
+              >
+                词条
+              </button>
+              <button
+                type="button"
+                className={searchMode === 'definition' ? 'seg active' : 'seg'}
+                onClick={() => setSearchMode('definition')}
+              >
+                释义含词
+              </button>
+              <button
+                type="button"
+                className={searchMode === 'pos' ? 'seg active' : 'seg'}
+                onClick={() => setSearchMode('pos')}
+              >
+                词性
+              </button>
+            </div>
+            {searchMode === 'lemma' ? (
+              <div className="segmented" role="group" aria-label="词条匹配">
+                <button
+                  type="button"
+                  className={wordMatch === 'prefix' ? 'seg active' : 'seg'}
+                  onClick={() => setWordMatch('prefix')}
+                >
+                  前缀
+                </button>
+                <button
+                  type="button"
+                  className={wordMatch === 'infix' ? 'seg active' : 'seg'}
+                  onClick={() => setWordMatch('infix')}
+                >
+                  中缀
+                </button>
+                <button
+                  type="button"
+                  className={wordMatch === 'suffix' ? 'seg active' : 'seg'}
+                  onClick={() => setWordMatch('suffix')}
+                >
+                  后缀
+                </button>
+              </div>
+            ) : null}
             <div className="search">
               <label htmlFor="entry-search" className="sr-only">
-                按词条前缀筛选
+                搜索
               </label>
               <input
                 id="entry-search"
-                placeholder="前缀搜索 lemma…"
+                placeholder={searchPlaceholder(searchMode, wordMatch)}
                 value={query}
-                title="按词条前缀筛选"
+                title={searchPlaceholder(searchMode, wordMatch)}
                 onChange={(e) => setQuery(e.target.value)}
               />
             </div>
@@ -255,7 +333,12 @@ export default function App() {
                 className={`entryRow ${selectedId === row.id ? 'active' : ''}`}
                 onClick={() => setSelectedId(row.id)}
               >
-                <div className="word mono">{row.word}</div>
+                <div className="wordLine">
+                  <span className="word mono">{row.word}</span>
+                  {row.guessZh ? (
+                    <span className="lemmaGuess gloss hit mono">{row.guessZh}</span>
+                  ) : null}
+                </div>
                 {row.preview ? (
                   <div className="preview mono">{row.preview}</div>
                 ) : null}

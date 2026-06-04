@@ -122,8 +122,49 @@
   background: var(--panel);
 }
 
+.wordLine {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
 .word {
   font-weight: 620;
+}
+
+.lemmaGuess {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.searchToolbar {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.searchToolbar .search {
+  width: 100%;
+}
+
+.segmented {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.seg {
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.seg.active {
+  background: var(--panel);
+  font-weight: 600;
 }
 
 .preview {

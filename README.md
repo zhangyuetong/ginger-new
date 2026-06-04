@@ -77,13 +77,13 @@ npm install
 npm run dev
 ```
 
-界面功能：前缀搜索、义项展示、gloss 中文替换、对每个词持久化推测等（**不包含**表格上传）。
+界面功能：词条前/中/后缀搜索、释义含词搜索、按词性搜索、左侧列表显示推测词义、义项展示、gloss 中文替换、对每个词持久化推测等（**不包含**表格上传）。
 
 ## REST 概要
 
 | 接口 | 说明 |
 | --- | --- |
 | `GET /api/health` | 存活检查 |
-| `GET /api/entries?query=&cursor=&limit=` | 分页列表 |
+| `GET /api/entries?query=&cursor=&limit=&searchMode=&wordMatch=` | 分页列表；`searchMode`：`lemma`（默认）\|`definition`\|`pos`；`wordMatch`：`prefix`（默认）\|`infix`\|`suffix`（仅 `lemma`）；释义含词为整词+词界；词性查询可写 `k` 或 `k.` |
 | `GET /api/entries/{id}` | 详情 |
 | `PATCH /api/entries/{id}/guess` | body：`{"guessZh": "..."}` ，空字符串会清空推测 |
