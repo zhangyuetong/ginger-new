@@ -1,13 +1,39 @@
-Ginger.xlsx
-backend/app/__pycache__/__init__.cpython-313.pyc
-backend/app/__pycache__/bootstrap_import.cpython-313.pyc
-backend/app/__pycache__/database.cpython-313.pyc
-backend/app/__pycache__/ingest.cpython-313.pyc
-backend/app/__pycache__/main.cpython-313.pyc
-backend/app/__pycache__/models.cpython-313.pyc
-backend/app/__pycache__/parser.cpython-313.pyc
-backend/app/__pycache__/render.cpython-313.pyc
-backend/app/__pycache__/routes_entries.cpython-313.pyc
-backend/app/__pycache__/routes_import.cpython-313.pyc
-backend/app/__pycache__/schemas.cpython-313.pyc
-backend/tests/__pycache__/test_parser.cpython-313-pytest-8.3.4.pyc
+# OS and editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Python caches and virtual environments
+__pycache__/
+*.py[cod]
+*.pyd
+*.so
+.python-version
+.venv/
+venv/
+env/
+
+# Python tooling and test artifacts
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Frontend dependencies and build output
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Coding Agents
+.claude/
+.codex/
