@@ -34,6 +34,7 @@ from app.parser import (  # noqa: E402
 from app.render import (  # noqa: E402
     build_words_index,
     render_definition_struct,
+    segment_to_spans,
     text_contains_lemma,
 )
 
@@ -142,6 +143,22 @@ def _rendered_lines(row: sqlite3.Row, guess_index: dict[int, dict[str, str]], gu
             marker = f"  {n}. " if isinstance(n, int) else "  · "
             lines.append(marker + buf.strip())
     return lines
+
+
+def _render_inline_spans(spans: list[dict[str, str]]) -> str:
+    buf = ""
+    for sp in spans:
+        if sp.get("kind") == "gloss":
+            buf += "《" + sp.get("value", "") + "》"
+        else:
+            buf += sp.get("value", "")
+    return buf
+
+
+def _translate_text(conn: sqlite3.Connection, text: str) -> tuple[str, list[dict[str, str]]]:
+    guess_index = build_words_index(_all_guess_pairs(conn))
+    spans = segment_to_spans(text, guess_index)
+    return _render_inline_spans(spans), spans
 
 
 # --------------------------------------------------------------------------- #
@@ -267,6 +284,22 @@ def cmd_abbr(conn: sqlite3.Connection, args: argparse.Namespace) -> None:
     for r in rows:
         meaning = (r["guess_zh"] or "").strip() or "(未推测)"
         print(f"{r['word']} {meaning}")
+
+
+def cmd_translate(conn: sqlite3.Connection, args: argparse.Namespace) -> None:
+    translated, spans = _translate_text(conn, args.text)
+    if args.json:
+        print(json.dumps(
+            {
+                "source": args.text,
+                "translated": translated,
+                "spans": spans,
+            },
+            ensure_ascii=False, indent=2,
+        ))
+        return
+
+    print(translated)
 
 
 def _resolve(conn: sqlite3.Connection, ref: str) -> sqlite3.Row | None:
@@ -398,6 +431,11 @@ def build_parser() -> argparse.ArgumentParser:
     sp = sub.add_parser("abbr", help="列出全部词性标记及其中文含义")
     sp.add_argument("--json", action="store_true")
     sp.set_defaults(func=cmd_abbr)
+
+    sp = sub.add_parser("translate", help="分词并用已推测词义渲染任意 Ginger 句子")
+    sp.add_argument("text")
+    sp.add_argument("--json", action="store_true")
+    sp.set_defaults(func=cmd_translate)
 
     sp = sub.add_parser("show", help="查看词条详情（id 或精确词形）")
     sp.add_argument("ref")

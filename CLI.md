@@ -28,6 +28,7 @@ python cli.py <子命令> [参数]
 | 释义含词搜索（整词、词界匹配） | `def <word>` |
 | 按词性搜索 | `pos <p>` |
 | 查看全部词性标记含义 | `abbr` |
+| 渲染一句 Ginger 文本 | `translate <text>` |
 | 点开词条看详情 / 义项 / 中文替换 | `show <id\|word>` |
 | 「释义仅 Ginger 原文」开关 | `show <ref> --raw` |
 | 左侧列表显示的已推测词义（gloss 词典） | `guesses` |
@@ -67,6 +68,15 @@ python cli.py abbr
 sj. 名词
 k. 动词
 ...
+```
+
+### `translate` —— 分词并渲染一句 Ginger 文本
+```bash
+python cli.py translate "sxzu saqr dkdg f sjlup."
+```
+使用当前数据库里的已推测词义做最长匹配替换，命中的词用 `《》` 包起，未命中的词保持原型：
+```text
+《极多》 《水》 《存在》 《的》 《地点》.
 ```
 
 ### `show` —— 词条详情
@@ -114,6 +124,9 @@ python cli.py def gudde
 python cli.py pos k.
 python cli.py word afsu --match infix
 
-# 5. 推断出含义后写回
+# 5. 临时渲染一段 Ginger 文本
+python cli.py translate "sxzu saqr dkdg f sjlup."
+
+# 6. 推断出含义后写回
 python cli.py set afsu 移动
 ```
