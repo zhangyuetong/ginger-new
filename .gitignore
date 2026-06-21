@@ -36,4 +36,4 @@ pnpm-debug.log*
 
 # Coding Agents
 .claude/
-.codex/
+.agents/
