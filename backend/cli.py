@@ -370,7 +370,7 @@ def cmd_set(conn: sqlite3.Connection, args: argparse.Namespace) -> None:
         sys.exit(f"找不到词条：{args.ref!r}")
     val = args.guess.strip()
     conn.execute(
-        "UPDATE entries SET guess_zh = ?, updated_at = datetime('now') WHERE id = ?",
+        "UPDATE entries SET guess_zh = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%S+00:00', 'now') WHERE id = ?",
         (None if val == "" else val, r["id"]),
     )
     conn.commit()
