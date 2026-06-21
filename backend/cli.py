@@ -75,6 +75,17 @@ def _parsed_for(row: sqlite3.Row) -> dict[str, Any]:
     return parsed
 
 
+def _part_of_speech_rows(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+    """按 parser 中定义的顺序返回词性占位词条。"""
+    placeholders = ",".join("?" for _ in PART_OF_SPEECH_LEXEMES)
+    rows = conn.execute(
+        f"SELECT * FROM entries WHERE word IN ({placeholders})",
+        PART_OF_SPEECH_LEXEMES,
+    ).fetchall()
+    by_word = {str(r["word"]): r for r in rows}
+    return [by_word[word] for word in PART_OF_SPEECH_LEXEMES if word in by_word]
+
+
 # --------------------------------------------------------------------------- #
 # 渲染（与后端 _build_list_row / _build_entry_detail 同语义）
 # --------------------------------------------------------------------------- #
@@ -233,6 +244,31 @@ def cmd_pos(conn: sqlite3.Connection, args: argparse.Namespace) -> None:
     _emit_rows(conn, rows, args.json, has_more)
 
 
+def cmd_abbr(conn: sqlite3.Connection, args: argparse.Namespace) -> None:
+    rows = _part_of_speech_rows(conn)
+    if args.json:
+        print(json.dumps(
+            [
+                {
+                    "id": r["id"],
+                    "word": r["word"],
+                    "guessZh": r["guess_zh"],
+                }
+                for r in rows
+            ],
+            ensure_ascii=False, indent=2,
+        ))
+        return
+
+    if not rows:
+        print("(无词性标记)")
+        return
+
+    for r in rows:
+        meaning = (r["guess_zh"] or "").strip() or "(未推测)"
+        print(f"{r['word']} {meaning}")
+
+
 def _resolve(conn: sqlite3.Connection, ref: str) -> sqlite3.Row | None:
     if ref.isdigit():
         return conn.execute("SELECT * FROM entries WHERE id = ?", (int(ref),)).fetchone()
@@ -265,8 +301,8 @@ def cmd_show(conn: sqlite3.Connection, args: argparse.Namespace) -> None:
 
     guess = f"  →{r['guess_zh']}" if r["guess_zh"] else "  （未推测）"
     print(f"#{r['id']}  {r['word']}{guess}")
-    if r["color_idx"] is not None:
-        print(f"colorIdx: {r['color_idx']}    updated: {r['updated_at']}")
+    # if r["color_idx"] is not None:
+    #     print(f"colorIdx: {r['color_idx']}    updated: {r['updated_at']}")
     print(f"\n[原文] {r['definition_raw']}")
     warns = parsed.get("parseWarnings") or []
     if parsed.get("error"):
@@ -274,7 +310,7 @@ def cmd_show(conn: sqlite3.Connection, args: argparse.Namespace) -> None:
     for w in warns:
         print(f"[警告] {w}")
     if not args.raw:
-        print("\n[释义 / 已替换中文用《》标出]")
+        print("\n[释义]")
         for line in _rendered_lines(r, guess_index, guess_map):
             print(line)
 
@@ -358,6 +394,10 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--limit", type=int, default=80)
     sp.add_argument("--json", action="store_true")
     sp.set_defaults(func=cmd_pos)
+
+    sp = sub.add_parser("abbr", help="列出全部词性标记及其中文含义")
+    sp.add_argument("--json", action="store_true")
+    sp.set_defaults(func=cmd_abbr)
 
     sp = sub.add_parser("show", help="查看词条详情（id 或精确词形）")
     sp.add_argument("ref")
